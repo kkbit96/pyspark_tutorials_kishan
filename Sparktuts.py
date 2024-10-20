@@ -164,5 +164,17 @@ df22 = df20.select(df20["firstname"], df20["lastname"], df20["age"], df20["city"
                    (df20["firstname"] + F.lit(" ") + df20["lastname"]).alias(
                        "fullname"))  # This won't work without f.concat or f.lit
 
+# Understanding cols function
+data = [("James", "Wan", 24, "New York"), ("Ann", "Hathaway", 28, "Toronto")]
+columns = ["firstname", "lastname", "age", "city"]
+df23 = spark.createDataFrame(data, schema=columns)
+df24 = df23.select(F.col("firstname"), F.col("age"))
+df25 = df23.select(F.col("firstname"), F.col("lastname"), F.col("age"), F.col("city"),
+                   F.concat(F.col("firstname"), F.lit(", "), F.col("lastname")).alias(
+                       "fullname"))  # try using F.concat to add two columns
+
+from pyspark.sql.functions import col
+cols = ["firstname", "lastname", "age", "city"]
+df26 = df23.select(*[col(col_name) for col_name in cols])
+df26.show()
 spark.stop()
- 
