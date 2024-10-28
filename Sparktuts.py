@@ -176,5 +176,6 @@ df25 = df23.select(F.col("firstname"), F.col("lastname"), F.col("age"), F.col("c
 from pyspark.sql.functions import col
 cols = ["firstname", "lastname", "age", "city"]
 df26 = df23.select(*[col(col_name) for col_name in cols])
-df26.show()
+
+
 spark.stop()
