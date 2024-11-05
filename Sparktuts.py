@@ -177,5 +177,15 @@ from pyspark.sql.functions import col
 cols = ["firstname", "lastname", "age", "city"]
 df26 = df23.select(*[col(col_name) for col_name in cols])
 
-
+# Invoking functions using spark column objects
+data = [("James", "Wan", 24, "New York"), ("Ann", "Hathaway", 28, "Toronto")]
+columns = ["firstname", "lastname", "age", "city"]
+df27 = spark.createDataFrame(data, schema=columns)
+df27.show()
+# Concatenate firstname and lastname using alias fullname
+df28 = df27.select(F.concat(F.col("firstname"), F.lit(" "), F.col("lastname")).alias("fullname"))   # This won't work without f.concat or f.lit
+#df28.show()
+# To add a column fullname to the original dataframe
+df29 = df27.withColumn("fullname", F.concat(F.col("firstname"), F.lit(" "), F.col("lastname")))
+df29.show()
 spark.stop()
