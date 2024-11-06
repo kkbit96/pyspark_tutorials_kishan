@@ -181,11 +181,58 @@ df26 = df23.select(*[col(col_name) for col_name in cols])
 data = [("James", "Wan", 24, "New York"), ("Ann", "Hathaway", 28, "Toronto")]
 columns = ["firstname", "lastname", "age", "city"]
 df27 = spark.createDataFrame(data, schema=columns)
-df27.show()
+
 # Concatenate firstname and lastname using alias fullname
 df28 = df27.select(F.concat(F.col("firstname"), F.lit(" "), F.col("lastname")).alias("fullname"))   # This won't work without f.concat or f.lit
 #df28.show()
 # To add a column fullname to the original dataframe
 df29 = df27.withColumn("fullname", F.concat(F.col("firstname"), F.lit(" "), F.col("lastname")))
-df29.show()
+
+# Renaming spark dataframe columns or expressions
+data = [("James", "Wan", 24, "New York"), ("Ann", "Hathaway", 28, "Toronto")]
+columns = ["firstname", "lastname", "age", "city"]
+df30 = spark.createDataFrame(data, schema=columns)
+df31 = df30.select(F.col("firstname").alias("fname"), F.col("lastname").alias("lname"))
+# Rename columns using withColumnRenamed
+df32 = df30.withColumnRenamed("firstname", "fname").withColumnRenamed("lastname", "lname")
+course_count = [4,5]
+# Append the course_count to the original dataframe
+df33 = df30.append("course_count", course_count)
+
+# Predefined functions using spark dataframe API
+df34 = spark.createDataFrame(data, schema=columns)
+df35 = df34.select(F.concat(F.col("firstname"), F.lit(" "), F.col("lastname")).alias("fullname"))
+df36 = df34.select(F.concat_ws(" ", F.col("firstname"), F.col("lastname")).alias("fullname"))
+df37 = df34.select(F.lower(F.col("firstname")).alias("lower"))
+df38 = df34.select(F.upper(F.col("firstname")).alias("upper"))
+df39 = df34.select(F.length(F.col("firstname")).alias("length"))
+df40 = df34.select(F.trim(F.col("firstname")).alias("trim"))
+df41 = df34.select(F.ltrim(F.col("firstname")).alias("ltrim"))
+df42 = df34.select(F.rtrim(F.col("firstname")).alias("rtrim"))
+df43 = df34.select(F.reverse(F.col("firstname")).alias("reverse"))
+df44 = df34.select(F.substring(F.col("firstname"), 1, 3).alias("substring"))
+df45 = df34.select(F.initcap(F.col("firstname")).alias("initcap"))
+df46 = df34.select(F.coalesce(F.col("firstname"), F.col("lastname")).alias("coalesce"))
+df47 = df34.select(F.col("firstname").cast("int").alias("cast"))
+df48 = df34.select(F.col("firstname").between("A", "L").alias("between"))
+df49 = df34.select(F.col("firstname").contains("J").alias("contains"))
+df50 = df34.select(F.col("firstname").startswith("J").alias("startswith"))
+df51 = df34.select(F.col("firstname").endswith("s").alias("endswith"))
+df52 = df34.select(F.col("firstname").isNull().alias("isNull"))
+df53 = df34.select(F.col("firstname").isNotNull().alias("isNotNull"))
+df54 = df34.select(F.col("firstname").isin("James", "Ann").alias("isin"))
+df55 = df34.select(F.col("firstname").like("J%").alias("like"))
+df56 = df34.select(F.col("firstname").rlike("J.*").alias("rlike"))
+df57 = df34.select(F.col("firstname").substr(1, 3).alias("substr"))
+df58 = df34.select(F.col("firstname").when(F.col("firstname") == "James", "True").alias("when"))
+df59 = df34.select(F.col("firstname").otherwise("False").alias("otherwise"))
+df60 = df34.select(F.col("firstname").cast("int").alias("cast"))
+df61 = df34.select(F.col("firstname").asc().alias("asc"))
+df62 = df34.select(F.col("firstname").desc().alias("desc"))
+df63 = df34.select(F.col("firstname").desc_nulls_first().alias("desc_nulls_first"))
+df64 = df34.select(F.col("firstname").desc_nulls_last().alias("desc_nulls_last"))
+df65 = df34.select(F.col("firstname").asc_nulls_first().alias("asc_nulls_first"))
+df66 = df34.select(F.col("firstname").asc_nulls_last().alias("asc_nulls_last"))
+
+
 spark.stop()
