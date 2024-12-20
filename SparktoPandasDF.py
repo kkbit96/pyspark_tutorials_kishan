@@ -23,7 +23,16 @@ schemaStruct = StructType([
              StructField('salary', StringType(), True)
          ])
 df = spark.createDataFrame(data=dataStruct, schema = schemaStruct)
+from pyspark.sql.functions import col,struct,when
+updatedDF = df.withColumn("OtherInfo", struct(col("dob").alias("dob"),
+    col("gender").alias("gender"),
+    col("salary").alias("salary"),
+    when(col("salary").cast(IntegerType()) < 2000,"Low")
+      .when(col("salary").cast(IntegerType()) < 4000,"Medium")
+      .otherwise("High").alias("Salary_Grade")
+  ))
 df.printSchema()
 df.show()
+updatedDF.show()
 pandasDF2 = df.toPandas()
 print(pandasDF2)
