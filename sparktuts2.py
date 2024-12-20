@@ -15,15 +15,20 @@ os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 spark = SparkSession.builder.appName('Session1').getOrCreate()
 
 # Overview of filter or where function on Spark Dataframe
-data = [("James", "Smith", "USA", "29"), ("Michael", "Rose", "USA", "22"), ("Robert", "Williams", "USA", "50")]
+data = [("James", "Smith", "USA", "29"), ("Michael", "Rose", "UK", "22"), ("Robert", "Williams", "JAPAN", "50")]
 schema = ["Firstname", "Lastname", "Country", "Age"]
 df = spark.createDataFrame(data, schema)
-# df.filter("Age<50").show()
-df.where(df.Country == "USA").show()
+# # df.filter("Age<50").show()
+# df.where(df.Country == "USA").show()
+#
+# # Running SQL queries on a spark dataframe 
+# df.createOrReplaceTempView("df_view")
+# spark.sql("""SELECT *
+#  FROM df_view
+#  WHERE Age < 50""") \
+#  .show()
+#
+# # Filter using not equal condition on spark dataframe
+# df.filter(df.Age != 22).show()
+df.drop("Lastname").show()
 
-# Running SQL queries on a spark dataframe
-df.createOrReplaceTempView("df_view")
-spark.sql("""SELECT *
- FROM df_view 
- WHERE Age < 50""") \
- .show()
