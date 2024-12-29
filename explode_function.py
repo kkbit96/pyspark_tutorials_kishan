@@ -57,3 +57,15 @@ columns = ["id", "Name", "Country", "Date"]
 df9 = spark.createDataFrame(data = datan, schema = columns)
 df10 = df9.groupBy("id").pivot("Name").agg(first("country"))
 df10.show()
+
+# Count the null values in each column of the dataframe
+datam = [("James", None, "M"),
+        ("Michael", "Rose", "M"),
+        ("Robert", "Williams", None),
+        ("Maria", "Anne", "F"),
+        ("Jen", None, "F"),
+        ("Jenna", None, "F")]
+columns = ["First_name", "Last_name", "Gender"]
+df11 = spark.createDataFrame(data = datam, schema = columns)
+df11.select([count(when(col(i).isNull(), i)).alias(i) for i in df11.columns]).show()
+
