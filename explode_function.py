@@ -1,6 +1,7 @@
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import explode, col, count, when, split
+
+from pyspark.sql.functions import explode, col, count, when, split, regexp_replace, first
 
 spark = SparkSession.builder.appName('Session1').getOrCreate()
 simpleData = [("James", "Sales", ["Java", "C++"]),
@@ -32,3 +33,27 @@ df4.select([count(when(col(i).isNull(), i)).alias(i) for i in df4.columns]).show
 #     .withColumn("Chemistry", split(col("Chemistry"), "\\|")[1].cast("int")) \
 #     .withColumn("Maths", split(col("Maths"), "\\|")[2].cast("int"))
 # df6.show()
+
+# Solve using REGEXP_REPLACE
+df = spark.read.text('input1.txt')
+df.show()
+df6 = df.withColumn("new_value", regexp_replace("value", "(.*?\\-){3}", "$0,")).drop("value")
+df7 = df6.withColumn("new_value_1", explode(split(col("new_value"), ","))).drop("new_value")
+df8 = df7.withColumn("Id", (split(col("new_value_1"), "\\-")[0])) \
+    .withColumn("Name", (split(col("new_value_1"), "\\-")[1])) \
+    .withColumn("age", (split(col("new_value_1"), "\\-")[2])).drop("new_value_1")
+df8.show()
+
+# Pivot function demonstration
+datan = [(1, "Gaga", "India", "2022-01-11"),
+         (2, "Raga", "USA", "2022-01-12"),
+         (1, "Sagar", "UK", "2022-01-13"),
+         (1, "Muni", "India", "2022-01-14"),
+         (2, "Raj", "USA", "2022-01-15"),
+         (2, "Kunal", "UK", "2022-01-16"),
+         (3, "Kunal", "UK", "2022-01-17"),
+         (3, "Kunal", "UK", "2022-01-18")]
+columns = ["id", "Name", "Country", "Date"]
+df9 = spark.createDataFrame(data = datan, schema = columns)
+df10 = df9.groupBy("id").pivot("Name").agg(first("country"))
+df10.show()
