@@ -2,7 +2,7 @@
 from pyspark.sql import SparkSession
 
 from pyspark.sql.functions import explode, col, count, when, split, regexp_replace, first, trim, lower, aggregate, sum, \
-    collect_list, struct
+    collect_list, struct, countDistinct, max, min
 
 spark = SparkSession.builder.appName('Session1').getOrCreate()
 simpleData = [("James", "Sales", ["Java", "C++"]),
@@ -90,3 +90,57 @@ columns = ["name", "food", "quantity"]
 df12 = spark.createDataFrame(data = datao, schema = columns)
 df13 = df12.groupBy("name", "food").agg(sum("quantity").alias("quantity"))
 df13.groupBy("name").agg(collect_list(struct("food", "quantity")).alias("food")).show()
+
+# Pyspark dataframe query to find all the duplicate emails in a table named person
+datap = [(1, "abc@gmail.com"),
+         (2, "bcd@gmail.com"),
+         (3, "abc@gmail.com")]
+columns = ["id", "email"]
+df14 = spark.createDataFrame(data = datap, schema = columns)
+df15 = df14.groupBy("email").agg(count("email").alias("count")).filter(col("count") > 1)
+df15.show()
+
+# Suppose there are two tables named Customers and Orders.
+# Write a query to get the names of all customers who have never ordered anything.
+datac = [(1, "James"),
+         (2, "Michael"),
+         (3, "Robert")]
+columns = ["id", "name"]
+df16 = spark.createDataFrame(data = datac, schema = columns)
+datao = [(1, 1),
+         (2, 2)]
+columns = ["order_id", "customer_id"]
+df17 = spark.createDataFrame(data = datao, schema = columns)
+df18 = df16.join(df17, df16["id"] == df17["customer_id"], "left").filter(df17["customer_id"].isNull()).select("name")
+df18.show()
+
+# Pyspark query for a report that provides the customer ids which bought all the products from product table
+datap = [(1, "apple"),
+         (2, "banana"),
+         (3, "apple"),
+         (1, "banana"),
+         (2, "apple")]
+columns = ["customer_id", "product"]
+df19 = spark.createDataFrame(data = datap, schema = columns)
+
+dataq = [("apple",), ("banana",)]
+columns = ["product"]
+df20 = spark.createDataFrame(data = dataq, schema = columns)
+df_customer = df19.groupBy("customer_id").agg(countDistinct("product").alias("count_product"))
+df_product = df20.agg(countDistinct(col("product")).alias("count_product"))
+
+joined_df = df_customer.join(df_product, df_customer["count_product"] == df_product["count_product"], "inner").select("customer_id")
+joined_df.show()
+
+# Get the employees, dept_id with maximum and minimum salary in each dept.
+datae = [(1, "John", 1000, 1),
+         (2, "Smith", 1500, 1),
+         (3, "Alice", 1200, 2),
+         (4, "Tom", 1300, 2),
+         (5, "Jerry", 1100, 3),
+         (6, "Kumar", 2000, 3)]
+columnse = ["emp_id", "emp_name", "salary", "dept_id"]
+df21 = spark.createDataFrame(data = datae, schema = columnse)
+df22 = df21.groupBy("dept_id").agg(max("salary").alias("max_salary"), min("salary").alias("min_salary")).select("dept_id", "max_salary", "min_salary")
+df22.show()
+
