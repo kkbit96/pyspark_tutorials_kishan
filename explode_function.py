@@ -1,4 +1,3 @@
-
 from pyspark.sql import SparkSession
 
 from pyspark.sql.functions import explode, col, count, when, split, regexp_replace, first, trim, lower, aggregate, sum, \
@@ -6,22 +5,22 @@ from pyspark.sql.functions import explode, col, count, when, split, regexp_repla
 
 spark = SparkSession.builder.appName('Session1').getOrCreate()
 simpleData = [("James", "Sales", ["Java", "C++"]),
-                ("Michael", "Sales", ["Spark", "Java"]),
-                ("Robert", "Marketing", ["C++", "Spark", "Java"])]
+              ("Michael", "Sales", ["Spark", "Java"]),
+              ("Robert", "Marketing", ["C++", "Spark", "Java"])]
 columns = ["Name", "Dept", "Languages"]
-df = spark.createDataFrame(data = simpleData, schema = columns)
+df = spark.createDataFrame(data=simpleData, schema=columns)
 df.select(col("Name"), col("Dept"), explode(col("Languages")).alias("Language")).show()
 
 # filter out the valid phone numbers using regex
 data3 = [("James", "987654321x"), ("Michael", "d9123456789"), ("Robert", "1234567890")]
 columns3 = ["Name", "Phone"]
-df3 = spark.createDataFrame(data = data3, schema = columns3)
+df3 = spark.createDataFrame(data=data3, schema=columns3)
 df3.filter(df3.Phone.rlike("^[0-9]{10}$")).show()
 
 # Count rows in each column where NULLs are present
 data4 = [("James", None), ("Michael", "Rose"), (None, "Williams")]
 columns4 = ["Name", "Lname"]
-df4 = spark.createDataFrame(data = data4, schema = columns4)
+df4 = spark.createDataFrame(data=data4, schema=columns4)
 df4.show()
 df4.select([count(when(col(i).isNull(), i)).alias(i) for i in df4.columns]).show()
 
@@ -55,19 +54,19 @@ datan = [(1, "Gaga", "India", "2022-01-11"),
          (3, "Kunal", "UK", "2022-01-17"),
          (3, "Kunal", "UK", "2022-01-18")]
 columns = ["id", "Name", "Country", "Date"]
-df9 = spark.createDataFrame(data = datan, schema = columns)
+df9 = spark.createDataFrame(data=datan, schema=columns)
 df10 = df9.groupBy("id").pivot("Name").agg(first("country"))
 df10.show()
 
 # Count the null values in each column of the dataframe
 datam = [("James", None, "M"),
-        ("Michael", "Rose", "M"),
-        ("Robert", "Williams", None),
-        ("Maria", "Anne", "F"),
-        ("Jen", None, "F"),
-        ("Jenna", None, "F")]
+         ("Michael", "Rose", "M"),
+         ("Robert", "Williams", None),
+         ("Maria", "Anne", "F"),
+         ("Jen", None, "F"),
+         ("Jenna", None, "F")]
 columns = ["First_name", "Last_name", "Gender"]
-df11 = spark.createDataFrame(data = datam, schema = columns)
+df11 = spark.createDataFrame(data=datam, schema=columns)
 df11.select([count(when(col(i).isNull(), i)).alias(i) for i in df11.columns]).show()
 
 # Write code to select the rows where id is odd and the description is 'boring'
@@ -87,7 +86,7 @@ datao = [("john", "tomato", 2),
 # inside collect_list of agg function we can use struct to create a list of struct in a custom format.
 
 columns = ["name", "food", "quantity"]
-df12 = spark.createDataFrame(data = datao, schema = columns)
+df12 = spark.createDataFrame(data=datao, schema=columns)
 df13 = df12.groupBy("name", "food").agg(sum("quantity").alias("quantity"))
 df13.groupBy("name").agg(collect_list(struct("food", "quantity")).alias("food")).show()
 
@@ -96,7 +95,7 @@ datap = [(1, "abc@gmail.com"),
          (2, "bcd@gmail.com"),
          (3, "abc@gmail.com")]
 columns = ["id", "email"]
-df14 = spark.createDataFrame(data = datap, schema = columns)
+df14 = spark.createDataFrame(data=datap, schema=columns)
 df15 = df14.groupBy("email").agg(count("email").alias("count")).filter(col("count") > 1)
 df15.show()
 
@@ -106,11 +105,11 @@ datac = [(1, "James"),
          (2, "Michael"),
          (3, "Robert")]
 columns = ["id", "name"]
-df16 = spark.createDataFrame(data = datac, schema = columns)
+df16 = spark.createDataFrame(data=datac, schema=columns)
 datao = [(1, 1),
          (2, 2)]
 columns = ["order_id", "customer_id"]
-df17 = spark.createDataFrame(data = datao, schema = columns)
+df17 = spark.createDataFrame(data=datao, schema=columns)
 df18 = df16.join(df17, df16["id"] == df17["customer_id"], "left").filter(df17["customer_id"].isNull()).select("name")
 df18.show()
 
@@ -121,15 +120,16 @@ datap = [(1, "apple"),
          (1, "banana"),
          (2, "apple")]
 columns = ["customer_id", "product"]
-df19 = spark.createDataFrame(data = datap, schema = columns)
+df19 = spark.createDataFrame(data=datap, schema=columns)
 
 dataq = [("apple",), ("banana",)]
 columns = ["product"]
-df20 = spark.createDataFrame(data = dataq, schema = columns)
+df20 = spark.createDataFrame(data=dataq, schema=columns)
 df_customer = df19.groupBy("customer_id").agg(countDistinct("product").alias("count_product"))
 df_product = df20.agg(countDistinct(col("product")).alias("count_product"))
 
-joined_df = df_customer.join(df_product, df_customer["count_product"] == df_product["count_product"], "inner").select("customer_id")
+joined_df = df_customer.join(df_product, df_customer["count_product"] == df_product["count_product"], "inner").select(
+    "customer_id")
 joined_df.show()
 
 # Get the employees, dept_id with maximum and minimum salary in each dept.
@@ -140,7 +140,7 @@ datae = [(1, "John", 1000, 1),
          (5, "Jerry", 1100, 3),
          (6, "Kumar", 2000, 3)]
 columnse = ["emp_id", "emp_name", "salary", "dept_id"]
-df21 = spark.createDataFrame(data = datae, schema = columnse)
-df22 = df21.groupBy("dept_id").agg(max("salary").alias("max_salary"), min("salary").alias("min_salary")).select("dept_id", "max_salary", "min_salary")
+df21 = spark.createDataFrame(data=datae, schema=columnse)
+df22 = df21.groupBy("dept_id").agg(max("salary").alias("max_salary"), min("salary").alias("min_salary")).select(
+    "dept_id", "max_salary", "min_salary")
 df22.show()
-
