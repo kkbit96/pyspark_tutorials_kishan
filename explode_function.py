@@ -1,7 +1,8 @@
 
 from pyspark.sql import SparkSession
 
-from pyspark.sql.functions import explode, col, count, when, split, regexp_replace, first
+from pyspark.sql.functions import explode, col, count, when, split, regexp_replace, first, trim, lower, aggregate, sum, \
+    collect_list, struct
 
 spark = SparkSession.builder.appName('Session1').getOrCreate()
 simpleData = [("James", "Sales", ["Java", "C++"]),
@@ -69,3 +70,23 @@ columns = ["First_name", "Last_name", "Gender"]
 df11 = spark.createDataFrame(data = datam, schema = columns)
 df11.select([count(when(col(i).isNull(), i)).alias(i) for i in df11.columns]).show()
 
+# Write code to select the rows where id is odd and the description is 'boring'
+# df.filter((col("id")%2 != 0) & trim(lower((col("description") != "boring")))).show()
+
+datao = [("john", "tomato", 2),
+         ("bill", "apple", 2),
+         ("john", "banana", 2),
+         ("john", "tomato", 3),
+         ("bill", "taco", 2),
+         ("bill", "apple", 2)]
+
+# I want a dataframe where output shoud be like following
+# john {tomato: 5, banana: 2}
+# bill {apple: 4, taco: 2}
+
+# inside collect_list of agg function we can use struct to create a list of struct in a custom format.
+
+columns = ["name", "food", "quantity"]
+df12 = spark.createDataFrame(data = datao, schema = columns)
+df13 = df12.groupBy("name", "food").agg(sum("quantity").alias("quantity"))
+df13.groupBy("name").agg(collect_list(struct("food", "quantity")).alias("food")).show()
