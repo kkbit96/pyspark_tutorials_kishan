@@ -144,3 +144,37 @@ df21 = spark.createDataFrame(data=datae, schema=columnse)
 df22 = df21.groupBy("dept_id").agg(max("salary").alias("max_salary"), min("salary").alias("min_salary")).select(
     "dept_id", "max_salary", "min_salary")
 df22.show()
+
+# Given a dataframe with Id column where some Ids are missing. Write a pyspark query to find the missing Ids
+datai = [(1, "James"),
+         (2, "Michael"),
+         (4, "Robert"),
+         (5, "Maria"),
+         (6, "Jen"),
+         (9, "Jenna")]
+columnsi = ["id", "name"]
+df23 = spark.createDataFrame(data=datai, schema=columnsi)
+df_list = df23.select(max(col("id")), min(col("id")))
+df_new = spark.range(df_list.first()[1], df_list.first()[0]+1)
+df_output = df_new.subtract(df23.select(col("id")))
+df_output.show()
+
+# Handle multiple delimiters in a csv file
+df24 = spark.read.option("header", True).option("sep", "|").csv("data.csv")
+df24.withColumn("Physics", split(col("Marks"), ",")[0].cast("int")) \
+    .withColumn("Chemistry", split(col("Marks"), ",")[1].cast("int")) \
+    .withColumn("Maths", split(col("Marks"), ",")[2].cast("int")).drop("Marks").show()
+
+dataa = [("Rudra", "Math", 79),
+         ("Rudra", "English", 75),
+         ("Shivu", "Math", 80),
+         ("Shivu", "English", 85),
+         ("Anu", "Math", 90),
+         ("Anu", "English", 95)]
+columnsa = ["Name", "Subject", "Marks"]
+df25 = spark.createDataFrame(data=dataa, schema=columnsa)
+df26 = df25.groupBy("Name").pivot("Subject").agg(first("Marks"))
+df26.show()
+
+# 
+
