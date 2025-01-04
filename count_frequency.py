@@ -35,3 +35,6 @@ def two_sum(li, target):
             return [dic[target - li[i]], i]
         dic[li[i]] = i
     return []
+
+dataList = [{'a': 1}, {'b': 3}, {'c': 5}]
+print(*[val for dic in dataList for val in dic.values()], sep='\n')
