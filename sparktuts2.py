@@ -27,3 +27,18 @@ spark.sql("""SELECT *
  FROM df_view 
  WHERE Age < 50""") \
  .show()
+
+data1 = [(1, "John"), (2, "Smith")]
+data2 = [("Alice", 3), ("Tom", 4)]
+
+# Create DataFrames
+df1 = spark.createDataFrame(data1, ["id", "name"])
+df2 = spark.createDataFrame(data2, ["name", "id"])
+
+# Using union (will cause incorrect data combination)
+union_df = df1.union(df2)
+union_df.show()
+
+# Using unionByName (correctly combines data by matching column names)
+union_by_name_df = df1.unionByName(df2, allowMissingColumns=True)
+union_by_name_df.show()

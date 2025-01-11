@@ -20,3 +20,7 @@ def reverse_string(li):
 # Reverse each string of a list using map
 def reverse_string2(li):
     return list(map(lambda x: x[::-1], li))
+
+# Reverse each word of a string
+def reverse_words(s):
+    return ' '.join([i[::-1] for i in s.split()])
