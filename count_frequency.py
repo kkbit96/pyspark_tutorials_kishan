@@ -35,3 +35,33 @@ def two_sum(li, target):
             return [dic[target - li[i]], i]
         dic[li[i]] = i
     return []
+
+dataList = [{'a': 1}, {'b': 3}, {'c': 5}]
+print(*[val for dic in dataList for val in dic.values()], sep='\n')
+
+use=[{'id': 29207858, 'isbn': '1632168146', 'isbn13': '9781632168146', 'ratings_count': 0}]
+for dic in use:
+    for val,cal in dic.items():
+        print(f'{val} is {cal}')
+
+# Merge two dictionaries
+dic1 = {'a': 1, 'b': 2}
+dic2 = {'c': 3, 'd': 4}
+dic1.update(dic2)
+print(dic1)
+
+dict1 = {'name' : 'Alice', 'age' : 25}
+for i in enumerate(dict1):
+    print(i)
+
+keys = ['a', 'b', 'c']
+
+#Using fromkeys
+my_dict = dict.fromkeys(keys, 0)
+print(my_dict)
+
+my_dict = {'name': 'Alice'}
+# Adds 'age' with default value 25
+value = my_dict.setdefault('age', 25)
+print(my_dict)
+print(my_dict.items())
