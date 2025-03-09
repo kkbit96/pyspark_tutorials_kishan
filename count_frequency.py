@@ -65,3 +65,9 @@ my_dict = {'name': 'Alice'}
 value = my_dict.setdefault('age', 25)
 print(my_dict)
 print(my_dict.items())
+
+# We can also remove a key pair from dictionary using pop() method as well
+test_dict = {'gfg' : 4, 'is' : 7, 'best' : 10}
+print(test_dict)
+del test_dict['is']
+print(str(test_dict))
