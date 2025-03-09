@@ -21,3 +21,18 @@ def remove_duplicates(arr):
 
 def remove_duplicates_function(arr):
     return len(set(arr))
+
+# Longest subarray with sum k
+def longest_subarray_sum(arr, k):
+    dic = {}
+    sum = 0
+    max_length = 0
+    for i in range(len(arr)):
+        sum += arr[i]
+        if sum == k:
+            max_length = i + 1
+        if sum not in dic:
+            dic[sum] = i
+        if sum - k in dic:
+            max_length = max(max_length, i - dic[sum - k])
+    return max
