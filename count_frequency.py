@@ -75,3 +75,9 @@ def count_freq_char(s):
         else:
             dic[i] = 1
     return dic
+
+# We can also remove a key pair from dictionary using pop() method as well
+test_dict = {'gfg' : 4, 'is' : 7, 'best' : 10}
+print(test_dict)
+del test_dict['is']
+print(str(test_dict))
