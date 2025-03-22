@@ -81,3 +81,13 @@ test_dict = {'gfg' : 4, 'is' : 7, 'best' : 10}
 print(test_dict)
 del test_dict['is']
 print(str(test_dict))
+
+# Find the leftmost repeating character in a string
+def leftmost_repeating_char(s):
+    dic = {}
+    for i in s:
+        if i in dic:
+            return i
+        else:
+            dic[i] = 1
+    return -1
