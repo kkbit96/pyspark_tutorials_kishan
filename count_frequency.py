@@ -91,3 +91,40 @@ def leftmost_repeating_char(s):
         else:
             dic[i] = 1
     return -1
+
+# Convert a roman string to decimal
+def roman_to_decimal(roman):
+    # Mapping of Roman numerals to their integer values
+    roman_values = {
+        'I': 1, 'V': 5, 'X': 10, 'L': 50,
+        'C': 100, 'D': 500, 'M': 1000
+    }
+    total = 0
+    prev_value = 0
+
+    # Iterate through the Roman numeral string from right to left
+    for char in reversed(roman):
+        value = roman_values[char]
+        if value < prev_value:
+            total -= value
+        else:
+            total += value
+        prev_value = value
+    return total
+
+# Maximum length subarray with sum zero
+def max_len_subarray(li):
+    dic = {}
+    max_len = 0
+    sum = 0
+    for i in range(len(li)):
+        sum += li[i]
+        if li[i] == 0 and max_len == 0:
+            max_len = 1
+        if sum == 0:
+            max_len = i + 1
+        if sum in dic:
+            max_len = max(max_len, i - dic[sum])
+        else:
+            dic[sum] = i
+    return max_len
