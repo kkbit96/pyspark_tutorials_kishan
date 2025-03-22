@@ -128,3 +128,11 @@ def max_len_subarray(li):
         else:
             dic[sum] = i
     return max_len
+
+# Union and intersection of two lists
+def union_intersection(li1, li2):
+    set1 = set(li1)
+    set2 = set(li2)
+    union = list(set1.union(set2))
+    intersection = list(set1.intersection(set2))
+    return union, intersection
