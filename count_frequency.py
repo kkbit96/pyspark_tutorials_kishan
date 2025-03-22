@@ -65,3 +65,13 @@ my_dict = {'name': 'Alice'}
 value = my_dict.setdefault('age', 25)
 print(my_dict)
 print(my_dict.items())
+
+# Count frequency of each character in a string
+def count_freq_char(s):
+    dic = {}
+    for i in s:
+        if i in dic:
+            dic[i] += 1
+        else:
+            dic[i] = 1
+    return dic
