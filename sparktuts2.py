@@ -161,10 +161,6 @@ order_item_schema = ["order_item_id", "order_id", "product_id", "quantity", "uni
 order_item_df = spark.createDataFrame(order_item_data, order_item_schema)
 order_df = order_df.filter(F.col("order_status") == "complete")
 order_item_df = order_item_df.withColumn("revenue", F.col("quantity") * F.col("unit_price"))
-
-<<<<<<< HEAD
-
-=======
 # # Workign with a dataset from an insurance company that tracks the policy changes over time.
 # # The dataset contains the following columns:
 # # 1. policy_id: unique identifier for each policy
@@ -199,4 +195,3 @@ df7.show()
 window_spec = Window.partitionBy("policy_id").orderBy("policy_start_date").rowsBetween(Window.currentRow-1, Window.currentRow+1) # Can use -1 and 0 as well
 df7 = df7.withColumn("rolling_avg", F.avg("premium_amount").over(window_spec))
 df7.show()
->>>>>>> e45fc57 (new commits)
