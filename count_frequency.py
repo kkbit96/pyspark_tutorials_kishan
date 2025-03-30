@@ -136,3 +136,11 @@ def union_intersection(li1, li2):
     union = list(set1.union(set2))
     intersection = list(set1.intersection(set2))
     return union, intersection
+
+# Left rotate an array by one
+def left_rotate(li):
+    temp = li[0]
+    for i in range(1, len(li)):
+        li[i - 1] = li[i]
+    li[-1] = temp
+    return li
