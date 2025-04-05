@@ -36,3 +36,21 @@ def longest_subarray_sum(arr, k):
         if sum - k in dic:
             max_length = max(max_length, i - dic[sum - k])
     return max
+
+# Sort an array of `0s`, `1s`, and `2s`without using any sorting algorithm
+def sort012(ls):
+    low = 0
+    mid = 0
+    high = len(ls) - 1
+
+    while mid <= high:
+        if ls[mid] == 0:
+            ls[low], ls[mid] = ls[mid], ls[low]
+            low += 1
+            mid += 1
+        elif ls[mid] == 1:
+            mid += 1
+        else:
+            ls[mid], ls[high] = ls[high], ls[mid]
+            high -= 1
+    return ls
