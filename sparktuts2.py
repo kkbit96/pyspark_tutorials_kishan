@@ -63,6 +63,7 @@ df3 = spark.createDataFrame(data3, schema)
 
 df3 = df3.withColumn("fruits_array", F.split(df3.fruits, ",\s*"))
 df3 = df3.select("name", F.explode("fruits_array").alias("fruit"))
+print("kishan df")
 df3.show()
 
 
