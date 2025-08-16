@@ -67,3 +67,25 @@ def greet():
     print("Hello World")
 
 greet()
+
+def next_greater(ls):
+    n = len(ls)
+    res = [-1]*n
+    for i in range(n):
+        for j in range(i + 1, n):
+            if ls[j] > ls[i]:
+                res[i] = ls[j]
+                break
+    return res
+
+def next_greater_stack(ls):
+    n = len(ls)
+    res = [-1] * n
+    stack = []
+
+    for i in range(n):
+        while stack and ls[stack[-1]] < ls[i]:
+            res[stack.pop()] = ls[i]
+        stack.append(i)
+
+    return res
