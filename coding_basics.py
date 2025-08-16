@@ -54,3 +54,16 @@ def sort012(ls):
             ls[mid], ls[high] = ls[high], ls[mid]
             high -= 1
     return ls
+
+
+# Decorators
+def decorator(func):
+    print("Before Decorator...")
+    func()
+    print("After Decorator...")
+
+@decorator
+def greet():
+    print("Hello World")
+
+greet()
