@@ -105,12 +105,12 @@ data = [("James", 24, "New York"), ("Ann", 28, "Toronto")]
 df9 = spark.createDataFrame(data, schema=schema3)
 
 # Create spark dataframe using pandas DataFrame
-import pandas as pd
-
-data = [("James", 24, "New York"), ("Ann", 28, "Toronto")]
-columns = ["name", "age", "city"]
-pandas_df = pd.DataFrame(data=data, columns=columns)
-df10 = spark.createDataFrame(pandas_df)
+# import pandas as pd
+#
+# data = [("James", 24, "New York"), ("Ann", 28, "Toronto")]
+# columns = ["name", "age", "city"]
+# pandas_df = pd.DataFrame(data=data, columns=columns)
+# df10 = spark.createDataFrame(pandas_df)
 
 # ArrayType columns in spark DataFrames
 data = [([1, 2, 3],), ([4, 5],), ([6, 7],)]
@@ -239,6 +239,7 @@ data = [("James, Smith",), ("Ann, Hathaway",)]
 columns = ["name"]
 df69 = spark.createDataFrame(data, schema=columns)
 df70 = df69.select(F.explode(F.split(F.col("name"), ",")).alias("name_split"))
+df70.show()
 
 # Padding characters around strings in spark dataframe columns
 data = [("James",), ("Ann",)]
