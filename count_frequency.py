@@ -144,3 +144,16 @@ def left_rotate(li):
         li[i - 1] = li[i]
     li[-1] = temp
     return li
+
+# Group Anagrams -
+# Input: ["eat","tea","tan","ate","nat","bat"]
+# Output: [["bat"], ["tan","ate","nat"], ["eat","tea"]]
+def group_anagrams(words):
+    anagram_dict = {}
+    for word in words:
+        key = tuple(sorted(word))
+        if key in anagram_dict:
+            anagram_dict[key].append(word)
+        else:
+            anagram_dict[key] = [word]
+    return list(anagram_dict.values())
