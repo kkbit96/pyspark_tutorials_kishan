@@ -196,3 +196,4 @@ df7.show()
 window_spec = Window.partitionBy("policy_id").orderBy("policy_start_date").rowsBetween(Window.currentRow-1, Window.currentRow+1) # Can use -1 and 0 as well
 df7 = df7.withColumn("rolling_avg", F.avg("premium_amount").over(window_spec))
 df7.show()
+
