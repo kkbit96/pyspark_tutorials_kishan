@@ -1,0 +1,237 @@
+{
+  "pipeline_config": {
+    "profiles": [
+      {
+        "name": "employee_profile",
+        "description": "HR Employee Data Processing",
+        "s3_path": "raw_data/hr/employees/",
+        "file_format": "json",
+        "target_table": "ETL_DATABASE.ETL_SCHEMA.EMPLOYEE_DATA",
+        "write_mode": "overwrite",
+        "convert_to_xml": true,
+        "xml_schema": {
+          "root_element": "employees",
+          "record_element": "employee",
+          "profile_attributes": {
+            "version": "1.0",
+            "source": "HR_SYSTEM",
+            "data_type": "employee_records"
+          },
+          "exclude_fields": ["record_id", "etl_batch_id"]
+        },
+        "transform_config": {
+          "standardize_names": true,
+          "validate_emails": true,
+          "calculate_metrics": true,
+          "add_metadata": true,
+          "custom_transformations": [
+            {
+              "operation": "add_column",
+              "column_name": "employee_level",
+              "expression": "CASE WHEN salary > 80000 THEN 'Senior' WHEN salary > 60000 THEN 'Mid' ELSE 'Junior' END"
+            },
+            {
+              "operation": "filter",
+              "condition": "salary > 0"
+            }
+          ]
+        },
+        "post_load_procedures": [
+          {
+            "name": "ETL_DATABASE.ETL_SCHEMA.VALIDATE_DATA_QUALITY",
+            "parameters": {
+              "TABLE_NAME": "ETL_DATABASE.ETL_SCHEMA.EMPLOYEE_DATA"
+            }
+          },
+          {
+            "name": "ETL_DATABASE.ETL_SCHEMA.CREATE_AGGREGATED_REPORTS"
+          }
+        ],
+        "data_quality_rules": [
+          {
+            "rule_name": "no_null_employee_id",
+            "column": "employee_id",
+            "rule_type": "not_null"
+          },
+          {
+            "rule_name": "valid_email_format",
+            "column": "email",
+            "rule_type": "regex",
+            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          },
+          {
+            "rule_name": "salary_range",
+            "column": "salary",
+            "rule_type": "range",
+            "min_value": 30000,
+            "max_value": 200000
+          }
+        ]
+      },
+      {
+        "name": "customer_profile",
+        "description": "Customer Data Processing",
+        "s3_path": "raw_data/crm/customers/",
+        "file_format": "csv",
+        "target_table": "ETL_DATABASE.ETL_SCHEMA.CUSTOMER_DATA",
+        "write_mode": "append",
+        "convert_to_xml": false,
+        "transform_config": {
+          "standardize_names": true,
+          "validate_emails": true,
+          "add_metadata": true,
+          "custom_transformations": [
+            {
+              "operation": "add_column",
+              "column_name": "customer_segment",
+              "expression": "CASE WHEN tier = 'Premium' THEN 'High Value' WHEN tier = 'Standard' THEN 'Medium Value' ELSE 'Low Value' END"
+            }
+          ]
+        },
+        "post_load_procedures": [
+          {
+            "name": "ETL_DATABASE.ETL_SCHEMA.VALIDATE_DATA_QUALITY",
+            "parameters": {
+              "TABLE_NAME": "ETL_DATABASE.ETL_SCHEMA.CUSTOMER_DATA"
+            }
+          }
+        ]
+      },
+      {
+        "name": "product_profile",
+        "description": "Product Catalog Processing",
+        "s3_path": "raw_data/catalog/products/",
+        "file_format": "parquet",
+        "target_table": "ETL_DATABASE.ETL_SCHEMA.PRODUCT_DATA",
+        "write_mode": "overwrite",
+        "convert_to_xml": true,
+        "xml_schema": {
+          "root_element": "products",
+          "record_element": "product",
+          "profile_attributes": {
+            "version": "2.0",
+            "source": "PRODUCT_CATALOG",
+            "data_type": "product_records"
+          }
+        },
+        "transform_config": {
+          "standardize_names": false,
+          "validate_emails": false,
+          "calculate_metrics": true,
+          "add_metadata": true,
+          "custom_transformations": [
+            {
+              "operation": "add_column",
+              "column_name": "price_category",
+              "expression": "CASE WHEN price > 1000 THEN 'High' WHEN price > 100 THEN 'Medium' ELSE 'Low' END"
+            }
+          ]
+        }
+      }
+    ],
+    "global_settings": {
+      "error_handling": {
+        "max_retries": 3,
+        "retry_delay_seconds": 60,
+        "continue_on_error": false
+      },
+      "logging": {
+        "level": "INFO",
+        "log_to_s3": true,
+        "log_s3_path": "logs/etl_pipeline/"
+      },
+      "performance": {
+        "parallel_jobs": 4,
+        "batch_size": 10000,
+        "cache_intermediate_results": true
+      }
+    }
+  },
+  "aws_config": {
+    "region": "us-east-1",
+    "s3_bucket": "your-etl-data-bucket",
+    "glue_jobs": {
+      "transform_job": "ETL-TransformJob",
+      "validate_job": "ETL-ValidateJob"
+    },
+    "lambda_functions": {
+      "data_quality_check": "ETL-DataQualityCheck",
+      "notification_handler": "ETL-NotificationHandler"
+    },
+    "step_functions": {
+      "main_workflow": "ETL-MainWorkflow",
+      "error_handling_workflow": "ETL-ErrorHandling"
+    }
+  },
+  "snowflake_config": {
+    "connection": {
+      "sfURL": "your_account.snowflakecomputing.com",
+      "sfUser": "your_username",
+      "sfPassword": "your_password",
+      "sfDatabase": "ETL_DATABASE",
+      "sfSchema": "ETL_SCHEMA",
+      "sfWarehouse": "ETL_WAREHOUSE",
+      "sfRole": "ETL_ROLE"
+    },
+    "tables": {
+      "employee_data": {
+        "table_name": "ETL_DATABASE.ETL_SCHEMA.EMPLOYEE_DATA",
+        "primary_key": "employee_id",
+        "partition_columns": ["processed_date"],
+        "clustering_keys": ["department"]
+      },
+      "customer_data": {
+        "table_name": "ETL_DATABASE.ETL_SCHEMA.CUSTOMER_DATA",
+        "primary_key": "customer_id",
+        "partition_columns": ["processed_date"],
+        "clustering_keys": ["tier"]
+      },
+      "product_data": {
+        "table_name": "ETL_DATABASE.ETL_SCHEMA.PRODUCT_DATA",
+        "primary_key": "product_id",
+        "partition_columns": ["processed_date"],
+        "clustering_keys": ["category"]
+      }
+    },
+    "stored_procedures": {
+      "data_quality": "ETL_DATABASE.ETL_SCHEMA.VALIDATE_DATA_QUALITY",
+      "aggregation": "ETL_DATABASE.ETL_SCHEMA.CREATE_AGGREGATED_REPORTS",
+      "archiving": "ETL_DATABASE.ETL_SCHEMA.ARCHIVE_OLD_DATA",
+      "cleanup": "ETL_DATABASE.ETL_SCHEMA.CLEANUP_TEMP_DATA"
+    }
+  },
+  "xml_profiles": {
+    "employee_xml": {
+      "root_element": "employees",
+      "record_element": "employee",
+      "namespace": "http://company.com/hr/employees",
+      "schema_location": "employees.xsd",
+      "encoding": "UTF-8",
+      "indentation": 2,
+      "include_metadata": true,
+      "field_mappings": {
+        "employee_id": "id",
+        "name": "full_name",
+        "email": "email_address",
+        "department": "dept",
+        "salary": "annual_salary"
+      }
+    },
+    "product_xml": {
+      "root_element": "products",
+      "record_element": "product",
+      "namespace": "http://company.com/catalog/products",
+      "schema_location": "products.xsd",
+      "encoding": "UTF-8",
+      "indentation": 2,
+      "include_metadata": true,
+      "field_mappings": {
+        "product_id": "id",
+        "product_name": "name",
+        "category": "product_category",
+        "price": "unit_price"
+      }
+    }
+  }
+}
+

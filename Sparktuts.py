@@ -249,4 +249,173 @@ df72 = df71.select(F.lpad(F.col("name"), 10, "#").alias("lpad"),
                    F.rpad(F.col("name"), 10, "#").alias("rpad"))
 df72.show()
 
+# =============================================================================
+# SQL Query: Find employees whose salary is greater than their department average
+# =============================================================================
+
+# First, let's create sample employee data with departments
+employee_data = [
+    ("John", "IT", 75000),
+    ("Alice", "IT", 80000),
+    ("Bob", "IT", 70000),
+    ("Carol", "HR", 65000),
+    ("David", "HR", 60000),
+    ("Eve", "HR", 70000),
+    ("Frank", "Finance", 90000),
+    ("Grace", "Finance", 85000),
+    ("Henry", "Finance", 80000),
+    ("Ivy", "Marketing", 55000),
+    ("Jack", "Marketing", 60000)
+]
+
+employee_schema = ["name", "department", "salary"]
+employees_df = spark.createDataFrame(employee_data, employee_schema)
+
+# Create a temporary view for SQL queries
+employees_df.createOrReplaceTempView("employees")
+
+print("Sample Employee Data:")
+employees_df.show()
+
+# =============================================================================
+# Method 1: Using Window Functions (Most Efficient)
+# =============================================================================
+print("\n=== Method 1: Using Window Functions ===")
+sql_query_1 = """
+SELECT name, department, salary, dept_avg_salary
+FROM (
+    SELECT name, department, salary,
+           AVG(salary) OVER (PARTITION BY department) as dept_avg_salary
+    FROM employees
+) 
+WHERE salary > dept_avg_salary
+ORDER BY department, salary DESC
+"""
+
+result1 = spark.sql(sql_query_1)
+print("Employees with salary greater than department average (Window Function):")
+result1.show()
+
+# =============================================================================
+# Method 2: Using Subquery
+# =============================================================================
+print("\n=== Method 2: Using Subquery ===")
+sql_query_2 = """
+SELECT e.name, e.department, e.salary, dept_avg.avg_salary
+FROM employees e
+INNER JOIN (
+    SELECT department, AVG(salary) as avg_salary
+    FROM employees
+    GROUP BY department
+) dept_avg ON e.department = dept_avg.department
+WHERE e.salary > dept_avg.avg_salary
+ORDER BY e.department, e.salary DESC
+"""
+
+result2 = spark.sql(sql_query_2)
+print("Employees with salary greater than department average (Subquery):")
+result2.show()
+
+# =============================================================================
+# Method 3: Using Common Table Expression (CTE)
+# =============================================================================
+print("\n=== Method 3: Using CTE ===")
+sql_query_3 = """
+WITH dept_averages AS (
+    SELECT department, AVG(salary) as avg_salary
+    FROM employees
+    GROUP BY department
+)
+SELECT e.name, e.department, e.salary, da.avg_salary
+FROM employees e
+INNER JOIN dept_averages da ON e.department = da.department
+WHERE e.salary > da.avg_salary
+ORDER BY e.department, e.salary DESC
+"""
+
+result3 = spark.sql(sql_query_3)
+print("Employees with salary greater than department average (CTE):")
+result3.show()
+
+# =============================================================================
+# Method 4: Using EXISTS (Alternative approach)
+# =============================================================================
+print("\n=== Method 4: Using EXISTS ===")
+sql_query_4 = """
+SELECT e1.name, e1.department, e1.salary
+FROM employees e1
+WHERE e1.salary > (
+    SELECT AVG(e2.salary)
+    FROM employees e2
+    WHERE e2.department = e1.department
+)
+ORDER BY e1.department, e1.salary DESC
+"""
+
+result4 = spark.sql(sql_query_4)
+print("Employees with salary greater than department average (EXISTS):")
+result4.show()
+
+# =============================================================================
+# PySpark DataFrame Approach (Equivalent to SQL)
+# =============================================================================
+print("\n=== PySpark DataFrame Approach ===")
+
+# Using Window Functions in PySpark
+from pyspark.sql.window import Window
+
+# Define window specification
+window_spec = Window.partitionBy("department")
+
+# Add department average salary column
+employees_with_avg = employees_df.withColumn(
+    "dept_avg_salary", 
+    F.avg("salary").over(window_spec)
+)
+
+# Filter employees with salary greater than department average
+result_pyspark = employees_with_avg.filter(
+    F.col("salary") > F.col("dept_avg_salary")
+).select("name", "department", "salary", "dept_avg_salary").orderBy("department", F.col("salary").desc())
+
+print("PySpark DataFrame Result:")
+result_pyspark.show()
+
+# =============================================================================
+# Additional Analysis: Department Statistics
+# =============================================================================
+print("\n=== Department Statistics ===")
+dept_stats = employees_df.groupBy("department").agg(
+    F.count("name").alias("employee_count"),
+    F.avg("salary").alias("avg_salary"),
+    F.min("salary").alias("min_salary"),
+    F.max("salary").alias("max_salary"),
+    F.sum("salary").alias("total_salary")
+).orderBy("department")
+
+dept_stats.show()
+
+# =============================================================================
+# Performance Comparison Query (for larger datasets)
+# =============================================================================
+print("\n=== Performance Analysis Query ===")
+performance_query = """
+SELECT 
+    department,
+    COUNT(*) as total_employees,
+    COUNT(CASE WHEN salary > dept_avg THEN 1 END) as above_avg_count,
+    ROUND(COUNT(CASE WHEN salary > dept_avg THEN 1 END) * 100.0 / COUNT(*), 2) as percentage_above_avg
+FROM (
+    SELECT name, department, salary,
+           AVG(salary) OVER (PARTITION BY department) as dept_avg
+    FROM employees
+)
+GROUP BY department
+ORDER BY percentage_above_avg DESC
+"""
+
+performance_result = spark.sql(performance_query)
+print("Department Performance Analysis:")
+performance_result.show()
+
 spark.stop()
