@@ -89,3 +89,50 @@ def next_greater_stack(ls):
         stack.append(i)
 
     return res
+
+# Find the two elements that occur only once in an array where all other elements occur twice
+def find_two_unique_hashmap(arr):
+    """
+    Finds two unique elements using a frequency dictionary / hash map.
+    Time Complexity: O(N)
+    Space Complexity: O(N)
+    """
+    freq = {}
+    for num in arr:
+        freq[num] = freq.get(num, 0) + 1
+    
+    result = [num for num, count in freq.items() if count == 1]
+    return result
+
+def find_two_unique_xor(arr):
+    """
+    Finds two unique elements using bitwise XOR operations.
+    Time Complexity: O(N)
+    Space Complexity: O(1)
+    """
+    # Step 1: XOR all elements in the array.
+    # The result will be (x ^ y) where x and y are the two unique elements.
+    xor_sum = 0
+    for num in arr:
+        xor_sum ^= num
+    
+    # Step 2: Find a set bit (rightmost set bit) in xor_sum.
+    # This bit is set in one of the unique elements and not the other.
+    rightmost_set_bit = xor_sum & -xor_sum
+    
+    # Step 3: Divide elements into two groups and XOR them separately.
+    x = 0
+    y = 0
+    for num in arr:
+        if num & rightmost_set_bit:
+            x ^= num
+        else:
+            y ^= num
+            
+    return [x, y]
+
+if __name__ == "__main__":
+    test_arr = [2, 4, 7, 9, 2, 4]
+    print("Array:", test_arr)
+    print("Unique elements (hashmap method):", find_two_unique_hashmap(test_arr))
+    print("Unique elements (XOR method):", find_two_unique_xor(test_arr))
