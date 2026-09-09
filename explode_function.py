@@ -1,7 +1,8 @@
 import os
 
-# PySpark 4.x needs Java 17+. macOS currently defaults to Temurin 8.
-os.environ.setdefault("JAVA_HOME", "/opt/homebrew/opt/openjdk@21")
+# PySpark 4.x needs Java 17 or 21. Do not use JDK 24+ (getSubject was removed).
+# Force JAVA_HOME: Cursor/IDE may already point at a newer JDK, so setdefault is not enough.
+os.environ["JAVA_HOME"] = "/opt/homebrew/opt/openjdk@21"
 os.environ["PATH"] = os.path.join(os.environ["JAVA_HOME"], "bin") + os.pathsep + os.environ.get("PATH", "")
 
 from pyspark.sql import SparkSession
