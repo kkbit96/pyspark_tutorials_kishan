@@ -4,13 +4,20 @@ import os
 # Force JAVA_HOME: Cursor/IDE may already point at a newer JDK, so setdefault is not enough.
 os.environ["JAVA_HOME"] = "/opt/homebrew/opt/openjdk@21"
 os.environ["PATH"] = os.path.join(os.environ["JAVA_HOME"], "bin") + os.pathsep + os.environ.get("PATH", "")
+# macOS hostname is "Unknown_fa:4d:dc:23:ae:1b" (colons). Java cannot bind that name.
+os.environ["SPARK_LOCAL_IP"] = "127.0.0.1"
 
 from pyspark.sql import SparkSession
 
 from pyspark.sql.functions import explode, col, count, when, split, regexp_replace, first, trim, lower, aggregate, sum, \
     collect_list, struct, countDistinct, max, min
 
-spark = SparkSession.builder.appName('Session1').getOrCreate()
+spark = (
+    SparkSession.builder.appName("Session1")
+    .config("spark.driver.host", "127.0.0.1")
+    .config("spark.driver.bindAddress", "127.0.0.1")
+    .getOrCreate()
+)
 simpleData = [("James", "Sales", ["Java", "C++"]),
               ("Michael", "Sales", ["Spark", "Java"]),
               ("Robert", "Marketing", ["C++", "Spark", "Java"])]
