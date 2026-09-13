@@ -190,5 +190,20 @@ df25 = spark.createDataFrame(data=dataa, schema=columnsa)
 df26 = df25.groupBy("Name").pivot("Subject").agg(first("Marks"))
 df26.show()
 
-# 
+# Filter valid email IDs from a given dataset using regex
+data_email = [
+    ("James", "james.bond@gmail.com"),
+    ("Michael", "michael@company"),
+    ("Robert", "robert.williams@outlook.co.uk"),
+    ("Maria", "maria@@yahoo.com"),
+    ("Jen", "jen.watson@data-science.org"),
+    ("Tom", "tom watson@gmail.com"),
+    ("Alice", "alice123@company.in"),
+]
+columns_email = ["Name", "Email"]
+df_email = spark.createDataFrame(data=data_email, schema=columns_email)
+valid_email_pattern = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+df_valid_emails = df_email.filter(col("Email").rlike(valid_email_pattern))
+df_valid_emails.show(truncate=False)
+
 
