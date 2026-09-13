@@ -41,12 +41,12 @@ df4.select([count(when(col(i).isNull(), i)).alias(i) for i in df4.columns]).show
 # In a csv file we are given with data which is both comma delimited and
 # marks column is pipe delimited for Physics, Chemistry and maths. We need to read the
 # data and convert it into a dataframe with proper schema
-# df5 = (spark.read.option("header", True).option("sep", ",")
-#        .option("inferSchema", True).csv("marks.csv"))
-# df6 = df5.withColumn("Physics", split(col("Physics"), "\\|")[0].cast("int")) \
-#     .withColumn("Chemistry", split(col("Chemistry"), "\\|")[1].cast("int")) \
-#     .withColumn("Maths", split(col("Maths"), "\\|")[2].cast("int"))
-# df6.show()
+df5 = (spark.read.option("header", True).option("sep", ",")
+       .option("inferSchema", True).csv("data.csv"))
+df6 = df5.withColumn("Physics", split(col("Physics"), "\\|")[0].cast("int")) \
+    .withColumn("Chemistry", split(col("Chemistry"), "\\|")[1].cast("int")) \
+    .withColumn("Maths", split(col("Maths"), "\\|")[2].cast("int"))
+df6.show()
 
 # Solve using REGEXP_REPLACE
 df = spark.read.text('input1.txt')
