@@ -9,8 +9,8 @@ os.environ["SPARK_LOCAL_IP"] = "127.0.0.1"
 
 from pyspark.sql import SparkSession
 
-from pyspark.sql.functions import explode, col, count, when, split, regexp_replace, first, trim, lower, aggregate, sum, \
-    collect_list, struct, countDistinct, max, min
+from pyspark.sql.functions import explode, col, count, map_from_entries, when, split, regexp_replace, first, trim, lower, aggregate, sum, \
+    collect_list, map_from_entries, countDistinct, max, min, struct, to_json
 
 spark = (
     SparkSession.builder.appName("Session1")
@@ -41,12 +41,12 @@ df4.select([count(when(col(i).isNull(), i)).alias(i) for i in df4.columns]).show
 # In a csv file we are given with data which is both comma delimited and
 # marks column is pipe delimited for Physics, Chemistry and maths. We need to read the
 # data and convert it into a dataframe with proper schema
-df5 = (spark.read.option("header", True).option("sep", ",")
-       .option("inferSchema", True).csv("data.csv"))
-df6 = df5.withColumn("Physics", split(col("Physics"), "\\|")[0].cast("int")) \
-    .withColumn("Chemistry", split(col("Chemistry"), "\\|")[1].cast("int")) \
-    .withColumn("Maths", split(col("Maths"), "\\|")[2].cast("int"))
-df6.show()
+# df5 = (spark.read.option("header", True).option("sep", ",")
+#        .option("inferSchema", True).csv("data.csv"))
+# df6 = df5.withColumn("Physics", split(col("Physics"), "\\|")[0].cast("int")) \
+#     .withColumn("Chemistry", split(col("Chemistry"), "\\|")[1].cast("int")) \
+#     .withColumn("Maths", split(col("Maths"), "\\|")[2].cast("int"))
+# df6.show()
 
 # Solve using REGEXP_REPLACE
 df = spark.read.text('input1.txt')
@@ -69,7 +69,7 @@ datan = [(1, "Gaga", "India", "2022-01-11"),
          (3, "Kunal", "UK", "2022-01-18")]
 columns = ["id", "Name", "Country", "Date"]
 df9 = spark.createDataFrame(data=datan, schema=columns)
-df10 = df9.groupBy("id").pivot("Name").agg(first("country"))
+df10 = df9.groupBy("Name").pivot("Country").agg(first("Date"))
 df10.show()
 
 # Count the null values in each column of the dataframe
@@ -96,13 +96,23 @@ datao = [("john", "tomato", 2),
 # I want a dataframe where output shoud be like following
 # john {tomato: 5, banana: 2}
 # bill {apple: 4, taco: 2}
+df = spark.createDataFrame(datao, ["name", "item", "count"])
 
+df_aggregated = df.groupBy("name", "item").agg(sum("count").alias("total_count"))
+
+result_df = df_aggregated.groupBy("name").agg(
+    to_json(map_from_entries(collect_list(struct(col("item"), col("total_count"))))).alias("items")
+)
+
+result_df.show(truncate=False)
 # inside collect_list of agg function we can use struct to create a list of struct in a custom format.
 
-columns = ["name", "food", "quantity"]
-df12 = spark.createDataFrame(data=datao, schema=columns)
-df13 = df12.groupBy("name", "food").agg(sum("quantity").alias("quantity"))
-df13.groupBy("name").agg(collect_list(struct("food", "quantity")).alias("food")).show()
+# columns = ["name", "food", "quantity"]
+# df12 = spark.createDataFrame(data=datao, schema=columns)
+# df13 = df12.groupBy("name", "food").agg(sum("quantity").alias("quantity"))
+# df13.groupBy("name").agg(collect_list(struct("food", "quantity")).alias("food")).show()
+
+
 
 # Pyspark dataframe query to find all the duplicate emails in a table named person
 datap = [(1, "abc@gmail.com"),
