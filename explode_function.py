@@ -216,4 +216,25 @@ valid_email_pattern = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
 df_valid_emails = df_email.filter(col("Email").rlike(valid_email_pattern))
 df_valid_emails.show(truncate=False)
 
+#Two tables named employee and department, write a sql query to get the department with no employees
+dataem = [(1, "James", 1000, 1),
+         (2, "Michael", 1500, 1),
+         (3, "Alice", 1200, 2),
+         (4, "Tom", 1300, 2),
+         (5, "Jerry", 1100, 3),
+         (6, "Kumar", 2000, 3)]
+columnse = ["emp_id", "emp_name", "salary", "dept_id"]
+df_employee = spark.createDataFrame(data=dataem, schema=columnse)
+data_dept = [(1, "James", 1000, 1),
+             (2, "Michael", 1500, 1),
+             (3, "Alice", 1200, 2),
+             (4, "Tom", 1300, 2),
+             (5, "Jerry", 1100, 3),
+             (6, "Kumar", 2000, 3)]
+columnsd = ["dept_id", "dept_name", "dept_salary", "dept_emp_id"]
+df_department = spark.createDataFrame(data=data_dept, schema=columnsd)
+#Use left_anti join to evaluate the treansform
+df_output = df_employee.join(df_department, df_employee["dept_id"] == df_department["dept_emp_id"], "left").filter(df_department["dept_emp_id"].isNull()).select("dept_name")
+df_output.show()
+
 

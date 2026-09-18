@@ -1,4 +1,4 @@
-from pyspark.python.pyspark.shell import spark
+
 from pyspark.sql import SparkSession
 from datetime import datetime, date
 from pyspark.sql.types import *
@@ -8,7 +8,12 @@ import sys
 import json
 from uuid import uuid4
 from pyspark.sql import Row
-
+# PySpark 4.x needs Java 17 or 21. Do not use JDK 24+ (getSubject was removed).
+# Force JAVA_HOME: Cursor/IDE may already point at a newer JDK, so setdefault is not enough.
+os.environ["JAVA_HOME"] = "/opt/homebrew/opt/openjdk@21"
+os.environ["PATH"] = os.path.join(os.environ["JAVA_HOME"], "bin") + os.pathsep + os.environ.get("PATH", "")
+# macOS hostname is "Unknown_fa:4d:dc:23:ae:1b" (colons). Java cannot bind that name.
+os.environ["SPARK_LOCAL_IP"] = "127.0.0.1"
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
