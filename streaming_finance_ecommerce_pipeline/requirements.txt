@@ -1,0 +1,4 @@
+# Dependencies for Real-Time Streaming Data Pipeline (PySpark, Kafka, Snowflake)
+pyspark>=3.3.0
+kafka-python>=2.0.2
+snowflake-connector-python>=3.0.0
