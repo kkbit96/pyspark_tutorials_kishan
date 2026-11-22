@@ -1,0 +1,19 @@
+{
+  "total_business_cases": 6,
+  "cases_reconciled": 3,
+  "cases_breached": 1,
+  "cases_plan_orphan": 1,
+  "cases_ric_orphan": 1,
+  "match_rate_pct": 50.0,
+  "total_contracts_processed": 100000,
+  "total_plan_premium": 125312650.45,
+  "total_ric_premium": 121600150.0,
+  "net_premium_delta": 3712500.45,
+  "total_plan_claims": 62600020.2,
+  "total_ric_claims": 62350020.0,
+  "net_claims_delta": 250000.2,
+  "total_plan_commission": 12530015.1,
+  "total_ric_commission": 12160015.0,
+  "net_commission_delta": 370000.1,
+  "gross_unreconciled_exposure": 9332500.75
+}
