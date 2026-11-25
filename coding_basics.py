@@ -131,8 +131,18 @@ def find_two_unique_xor(arr):
             
     return [x, y]
 
+def twoSum(nums, target):
+    seen = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+
+
 if __name__ == "__main__":
     test_arr = [2, 4, 7, 9, 2, 4]
     print("Array:", test_arr)
     print("Unique elements (hashmap method):", find_two_unique_hashmap(test_arr))
     print("Unique elements (XOR method):", find_two_unique_xor(test_arr))
+
